@@ -166,7 +166,7 @@ Int_t StTofMatchMaker::Make() {
 	if (trgid < 0) { return kStOK; }
 
 	mtMult->make(mPicoDst);
-	Int_t refmult = mtMult->mRefMult;
+	Int_t refMult = mtMult->mRefMult;
 	Int_t tofMult = mtMult->mTofMult;
 	Int_t nTofMatch = mtMult->mNTofMatch;
 	Int_t nTofBeta = mtMult->mNTofBeta;
@@ -176,8 +176,8 @@ Int_t StTofMatchMaker::Make() {
 		refMult, refMult3, tofMult, nTofMatch, nTofBeta,
 		vz, false
 	);
-	if (refmult3 < 0) { return kStOK; }
-	Int_t cent = corr->GetCentrality9(refmult3);
+	if (refMult3 < 0) { return kStOK; }
+	Int_t cent = mtCent->GetCentrality9(refMult3);
 	if (cent < 0 || cent >= 9) { return kStOK; }
 
 	// check DCA
