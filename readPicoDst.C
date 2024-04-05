@@ -43,7 +43,7 @@ void readPicoDst(const Char_t *inputFile = "file.list", TString JobIdName = "tof
         nEvents = total;
     for (Int_t i = 0; i < nEvents; i++)
     {
-        if (i % 1000 == 0)
+        if (i % 10000 == 0)
             cout << "Working on eventNumber " << i << endl;
 
         chain->Clear();
