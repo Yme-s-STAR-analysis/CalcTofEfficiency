@@ -144,12 +144,12 @@ Int_t StTofMatchMaker::Make() {
 	Double_t vx = pVtx.X();
 	Double_t vy = pVtx.Y();
 	Double_t vz = pVtx.Z();
-	Double_t vr = sqrt(vx * vx + vy * vy);
 
 	// using Ashish's shifted vr cut
 	// -> see: https://drupal.star.bnl.gov/STAR/system/files/Vr_xy_N_Vzcut.txt
 	vx = vx - 0.0417;
 	vy = vy + 0.2715;
+	Double_t vr = sqrt(vx * vx + vy * vy);
 
 	if (fabs(vx) < 1.e-5 && 
 		fabs(vy) < 1.e-5 &&

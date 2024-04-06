@@ -10,6 +10,10 @@ noooop
 
 ## Change log
 
+06.04.2024 by yghuang (v4.1.1):
+
+> 修改了一下vr计算的小bug
+
 05.04.2024 by yghuang (v4.1):
 
 > 使用最新的组件
