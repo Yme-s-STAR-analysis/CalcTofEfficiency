@@ -13,6 +13,7 @@
 #include "StPicoEvent/StPicoEpdHit.h"
 #include "StPicoEvent/StPicoEvent.h"
 #include "StPicoEvent/StPicoTrack.h"
+#include "StPicoEvent/StPicoPhysicalHelix.h"
 #include "StThreeVectorF.hh"
 #include "Stiostream.h"
 #include "TEfficiency.h"
@@ -145,17 +146,17 @@ Int_t StTofMatchMaker::Make() {
 	Double_t vy = pVtx.Y();
 	Double_t vz = pVtx.Z();
 
-	// using Ashish's shifted vr cut
-	// -> see: https://drupal.star.bnl.gov/STAR/system/files/Vr_xy_N_Vzcut.txt
-	vx = vx - 0.0417;
-	vy = vy + 0.2715;
-	Double_t vr = sqrt(vx * vx + vy * vy);
-
 	if (fabs(vx) < 1.e-5 && 
 		fabs(vy) < 1.e-5 &&
 		fabs(vz) < 1.e-5) {
 		return kStOK;
 	}
+
+	// using Ashish's shifted vr cut
+	// -> see: https://drupal.star.bnl.gov/STAR/system/files/Vr_xy_N_Vzcut.txt
+	vx = vx - 0.0417;
+	vy = vy + 0.2715;
+	Double_t vr = sqrt(vx * vx + vy * vy);
 
 	if (vr >= 1.0 || fabs(vz) > 50.0) {
 		return kStOK;
@@ -195,7 +196,9 @@ Int_t StTofMatchMaker::Make() {
 
 		if (!picoTrack->isPrimary()) { continue; }
 
-		Float_t dca = fabs(picoTrack->gDCA(vx, vy, vz));
+		// Float_t dca = fabs(picoTrack->gDCA(vx, vy, vz));
+		StPicoPhysicalHelix helix = picoTrack->helix(mField);
+        Float_t dca = fabs(helix.geometricSignedDistance(pVtx));
 
 		TVector3 pmomentum = picoTrack->pMom();
 		Float_t p = pmomentum.Mag();
@@ -215,10 +218,30 @@ Int_t StTofMatchMaker::Make() {
     	Int_t charge = (Int_t)picoTrack->charge();
 
 		Int_t btofMatchFlag = 0;
-		Int_t index2tof = picoTrack->bTofPidTraitsIndex();
-		if (index2tof >= 0){
-			btofMatchFlag = mPicoDst->btofPidTraits(index2tof)->btofMatchFlag();
-		}
+		Int_t tofId = picoTrack->bTofPidTraitsIndex();
+        Int_t btofMatchFlag = 0;
+        Double_t beta = -1.0;
+        Double_t btofYLocal = -999.0;
+        if (tofId >= 0) {
+            StPicoBTofPidTraits* tofPid = mPicoDst->btofPidTraits(tofId);
+            btofMatchFlag = tofPid->btofMatchFlag();
+            if (tofPid) {
+                beta = tofPid->btofBeta();
+                btofYLocal = tofPid->btofYLocal();
+                if (beta < 1e-4) { // recalculate time of flight
+                    Double_t tof = tofPid->btof();
+                    TVector3 btofHitPos = tofPid->btofHitPos();
+                    const StThreeVectorF* btofHitsPosSt = new StThreeVectorF(
+                        btofHitPos.X(),btofHitPos.Y(),btofHitPos.Z()
+                    );
+                    const StThreeVectorF* vtxPosSt = new StThreeVectorF(
+                        vx, vy, vz
+                    );
+                    Double_t L = tofPathLength(vtxPosSt, btofHitsPosSt, helix.curvature());
+                    beta = tof > 0 ? L / (tof * (C_C_LIGHT/1.e9)) : std::numeric_limits<Float_t>::quiet_NaN(); // note: quiet nan will never pass > N or < N
+                }
+            }
+        }
 
 		if (nHitsdEdx < 5 || nHitsFit < mCut_nHitsFit || nHitsRatio < 0.52) { // SYS ERR FLAG
 			continue;
@@ -233,7 +256,7 @@ Int_t StTofMatchMaker::Make() {
 			continue;
 		}
 
-    	bool acc = (btofMatchFlag > 0);
+    	bool acc = btofMatchFlag > 0 && beta > 0 && fabs(btofYLocal) < 1.8;
     	Int_t pidx = (Int_t)(charge < 0);  // 0 for proton, 1 for antiproton
 		// fill efficiency as function of eta and y
 		Int_t vzBin = vz_split(vz);
