@@ -189,6 +189,7 @@ Int_t StTofMatchMaker::Make() {
 
 	// track loop
   	Int_t nTracks = mPicoDst->numberOfTracks();
+	const Float_t mField = event->bField();
 
 	for (Int_t iTrack = 0; iTrack < nTracks; iTrack++) {
 		picoTrack = (StPicoTrack*)mPicoDst->track(iTrack);
@@ -219,7 +220,6 @@ Int_t StTofMatchMaker::Make() {
 
 		Int_t btofMatchFlag = 0;
 		Int_t tofId = picoTrack->bTofPidTraitsIndex();
-        Int_t btofMatchFlag = 0;
         Double_t beta = -1.0;
         Double_t btofYLocal = -999.0;
         if (tofId >= 0) {
