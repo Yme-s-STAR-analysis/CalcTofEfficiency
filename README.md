@@ -1,6 +1,6 @@
 # TOF match efficiency
 
-`version: 4.2`
+`version: 4.3`
 
 `author: yghuang`
 
@@ -10,7 +10,13 @@ noooop
 
 ## Change log
 
-07/04.2024 by yghuang (v4.2):
+19.04.2024 by yghuang (v4.3):
+
+> Updated bTOF beta and local Y cut
+>
+> As well as StCFMult module
+
+07.04.2024 by yghuang (v4.2):
 
 > Using submodule
 
