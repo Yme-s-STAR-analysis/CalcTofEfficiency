@@ -30,6 +30,7 @@
 #include "StRoot/TpcShiftTool/TpcShiftTool.h"
 #include "StRoot/TriggerTool/TriggerTool.h"
 #include "StRoot/StCFMult/StCFMult.h"
+#include "StRoot/VtxShiftTool/VtxShiftTool.h"
 
 StTofMatchMaker::StTofMatchMaker(
 	const char* name, 
@@ -75,6 +76,9 @@ Int_t StTofMatchMaker::Init() {
 
 	// trigger tool
 	mtTrg = new TriggerTool();
+
+	// vertext shift tool
+	mtVtx = new VtxShiftTool();
 
 	// set cuts
 	mCut_dca = 1.0;
@@ -152,12 +156,7 @@ Int_t StTofMatchMaker::Make() {
 		return kStOK;
 	}
 
-	// using Ashish's shifted vr cut
-	// -> see: https://drupal.star.bnl.gov/STAR/system/files/Vr_xy_N_Vzcut.txt
-	vx = vx - 0.0417;
-	vy = vy + 0.2715;
-	Double_t vr = sqrt(vx * vx + vy * vy);
-
+	auto vr = mtVtx->GetShiftedVr(vx, vy);
 	if (vr >= 1.0 || fabs(vz) > 50.0) {
 		return kStOK;
 	}

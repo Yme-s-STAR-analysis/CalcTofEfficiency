@@ -23,6 +23,7 @@ class TpcShiftTool;
 class TriggerTool;
 class MeanDcaTool;
 class CentCorrTool;
+class VtxShiftTool;
 
 
 class StTofMatchMaker : public StMaker {
@@ -60,6 +61,7 @@ class StTofMatchMaker : public StMaker {
 		CentCorrTool* mtCent;
 		MeanDcaTool* mtDca;
 		TriggerTool* mtTrg;
+		VtxShiftTool* mtVtx;
 
 		static const int nCent = 9;
 		static const int nVz = 5;
